@@ -2,25 +2,25 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
-from config import config, Config  # import Config to call init_firebase()
+from config import config, Config  # include Config to call init_firebase()
 
-# Create the app with configuration
+# Create Flask app
 app = Flask(__name__)
 
-# Load configuration based on environment
-env = os.environ.get('FLASK_ENV')
+# Load configuration
+env = os.environ.get('FLASK_ENV', 'development')
 app.config.from_object(config.get(env, config['default']))
 
-# Initialize Firebase Admin SDK from environment variables
-Config.init_firebase()  # <---- Add this here!
+# Initialize Firebase Admin SDK
+Config.init_firebase()
 
 # Set secret key
 app.secret_key = app.config['SECRET_KEY']
 
-# Configure proxy fix for production
+# Proxy fix (for production behind proxies)
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Initialize Flask-Login
+# Flask-Login setup
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin_login'
