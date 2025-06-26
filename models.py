@@ -125,3 +125,16 @@ class Admin(UserMixin):
         if username == admin_username:
             return Admin(username)
         return None
+
+def migrate_data_to_firestore():
+    """Migrate sample data to Firestore (run once)"""
+    from data import PROJECTS
+    
+    try:
+        for project_data in PROJECTS:
+            project = Project(project_data)
+            project.save()
+            print(f"Migrated project: {project.title}")
+        print("Data migration completed successfully!")
+    except Exception as e:
+        print(f"Error during migration: {e}")
