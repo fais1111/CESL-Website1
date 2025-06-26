@@ -6,7 +6,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from main import app
 from models import Project, Admin
 
-# Public Routes
+# --- Public Routes ---
 
 @app.route('/')
 def index():
@@ -35,7 +35,7 @@ def api_project(project_id):
         return jsonify({'error': 'Project not found'}), 404
     return jsonify(project)
 
-# Admin Authentication
+# --- Admin Authentication ---
 
 @app.route('/admin/login', methods=['GET', 'POST'])
 def admin_login():
@@ -50,7 +50,7 @@ def admin_login():
             flash('Login successful!', 'success')
             return redirect(request.args.get('next') or url_for('admin_dashboard'))
         else:
-            flash('Invalid username or password', 'error')
+            flash('Invalid username or password', 'danger')
 
     return render_template('admin/login.html')
 
@@ -62,13 +62,14 @@ def admin_logout():
     flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
 
-# Admin Dashboard & CRUD
+# --- Admin Dashboard & CRUD ---
 
 @app.route('/admin')
 @login_required
 def admin_dashboard():
     """Admin dashboard with list of projects"""
-    return render_template('admin/dashboard.html', projects=Project.get_all())
+    projects = Project.get_all()
+    return render_template('admin/dashboard.html', projects=projects)
 
 @app.route('/admin/project/new', methods=['GET', 'POST'])
 @login_required
@@ -81,7 +82,7 @@ def admin_project_new():
             flash('Project created successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
-            flash('Failed to create project.', 'error')
+            flash('Failed to create project.', 'danger')
 
     return render_template('admin/project_form.html', project=None)
 
@@ -91,7 +92,7 @@ def admin_project_edit(project_id):
     """Edit a project"""
     project = Project.get_by_id(project_id)
     if not project:
-        flash('Project not found', 'error')
+        flash('Project not found', 'danger')
         return redirect(url_for('admin_dashboard'))
 
     if request.method == 'POST':
@@ -101,7 +102,7 @@ def admin_project_edit(project_id):
             flash('Project updated successfully!', 'success')
             return redirect(url_for('admin_dashboard'))
         else:
-            flash('Failed to update project.', 'error')
+            flash('Failed to update project.', 'danger')
 
     return render_template('admin/project_form.html', project=project)
 
@@ -112,7 +113,7 @@ def admin_project_delete(project_id):
     if Project.delete(project_id):
         flash('Project deleted.', 'success')
     else:
-        flash('Failed to delete project.', 'error')
+        flash('Failed to delete project.', 'danger')
 
     return redirect(url_for('admin_dashboard'))
 
@@ -125,29 +126,46 @@ def admin_migrate():
         migrate_data_to_firestore()
         flash('Data migration completed.', 'success')
     except Exception as e:
-        flash(f'Error: {str(e)}', 'error')
+        flash(f'Error: {str(e)}', 'danger')
     return redirect(url_for('admin_dashboard'))
 
-# Utility function
+# --- Utility function ---
 
 def parse_project_form(req):
-    """Parse project form data into a dict"""
+    """Parse project form data into a dict safely"""
+    def safe_float(value, default=0.0):
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return default
+
+    def safe_int(value, default=2024):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return default
+
+    # Defensive fetch of list form fields
+    def safe_list(key):
+        vals = req.form.getlist(key)
+        return vals if vals else []
+
     return {
-        'title': req.form.get('title'),
-        'location': req.form.get('location'),
-        'lat': float(req.form.get('lat', 0)),
-        'lng': float(req.form.get('lng', 0)),
-        'type': req.form.get('type'),
-        'description': req.form.get('description'),
-        'status': req.form.get('status'),
-        'year': int(req.form.get('year', 2024)),
+        'title': req.form.get('title', ''),
+        'location': req.form.get('location', ''),
+        'lat': safe_float(req.form.get('lat')),
+        'lng': safe_float(req.form.get('lng')),
+        'type': req.form.get('type', ''),
+        'description': req.form.get('description', ''),
+        'status': req.form.get('status', ''),
+        'year': safe_int(req.form.get('year')),
         'details': {
-            'duration': req.form.get('duration'),
-            'team_size': req.form.get('team_size'),
-            'area': req.form.get('area'),
-            'findings': req.form.getlist('findings[]'),
-            'features': req.form.getlist('features[]'),
-            'techniques': req.form.getlist('techniques[]')
+            'duration': req.form.get('duration', ''),
+            'team_size': req.form.get('team_size', ''),
+            'area': req.form.get('area', ''),
+            'findings': safe_list('findings[]'),
+            'features': safe_list('features[]'),
+            'techniques': safe_list('techniques[]')
         },
-        'images': req.form.getlist('images[]')
+        'images': safe_list('images[]')
     }
