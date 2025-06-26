@@ -2,25 +2,25 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
-from config import config, Config  # include Config to call init_firebase()
+from config import config, Config
 
 # Create Flask app
 app = Flask(__name__)
 
-# Load configuration
-env = os.environ.get('FLASK_ENV', 'development')
+# Load env config
+env = os.environ.get('FLASK_ENV')
 app.config.from_object(config.get(env, config['default']))
 
-# Initialize Firebase Admin SDK
+# Initialize Firebase
 Config.init_firebase()
 
-# Set secret key
+# Set Flask secret
 app.secret_key = app.config['SECRET_KEY']
 
-# Proxy fix (for production behind proxies)
+# Middleware for proxy
 app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 
-# Flask-Login setup
+# Setup Flask-Login
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'admin_login'
@@ -32,7 +32,7 @@ def load_user(user_id):
     from models import Admin
     return Admin.get(user_id)
 
-# Security headers
+# Set security headers
 @app.after_request
 def security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
@@ -42,8 +42,9 @@ def security_headers(response):
         response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
     return response
 
-# Import routes
+# Load routes
 from routes import *
 
+# Run server
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
