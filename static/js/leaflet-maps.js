@@ -103,6 +103,33 @@ function addHomepageMarkers(projects) {
     // Clear existing markers
     clearHomepageMarkers();
     
+    // Function to generate popup content with dynamic sizing
+    const createPopupContent = (project, zoomLevel) => {
+        // Calculate base size based on zoom level
+        const baseSize = Math.max(10, 14 - (zoomLevel / 3));
+        const imageHeight = Math.max(80, 120 - (zoomLevel * 2));
+        
+        return `
+            <div class="leaflet-popup-content" style="font-size: ${baseSize}px;">
+                <img src="${project.images[0]}" alt="${project.title}" 
+                     style="width: 100%; max-width: 200px; height: ${imageHeight}px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;">
+                <h6 style="font-size: ${baseSize + 2}px;">${project.title}</h6>
+                <p class="mb-1"><strong>Location:</strong> ${project.location}</p>
+                <p class="mb-1"><strong>Type:</strong> ${project.type}</p>
+                <p class="mb-2"><strong>Status:</strong> ${project.status}</p>
+                <p class="mb-2" style="font-size: ${baseSize - 1}px;">${project.description.substring(0, 100)}...</p>
+                <div style="margin-top: 10px;">
+                    <button class="btn btn-sm btn-info" onclick="showProjectModal('${project.id}')" style="font-size: ${baseSize - 2}px;">
+                        Quick View
+                    </button>
+                    <a href="/project/${project.id}" class="btn btn-sm btn-outline-info ms-1" style="font-size: ${baseSize - 2}px;">
+                        Full Details
+                    </a>
+                </div>
+            </div>
+        `;
+    };
+    
     projects.forEach(project => {
         const iconUrl = project.type === 'Construction' ? 
             'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-yellow.png' :
@@ -117,27 +144,13 @@ function addHomepageMarkers(projects) {
             shadowSize: [41, 41]
         });
         
-        const marker = L.marker([project.lat, project.lng], { icon: customIcon })
-            .addTo(homepageMap)
-            .bindPopup(`
-                <div class="leaflet-popup-content">
-                    <img src="${project.images[0]}" alt="${project.title}" 
-                         style="width: 100%; max-width: 200px; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;">
-                    <h6>${project.title}</h6>
-                    <p class="mb-1"><strong>Location:</strong> ${project.location}</p>
-                    <p class="mb-1"><strong>Type:</strong> ${project.type}</p>
-                    <p class="mb-2"><strong>Status:</strong> ${project.status}</p>
-                    <p class="mb-2" style="font-size: 0.9em;">${project.description.substring(0, 100)}...</p>
-                    <div style="margin-top: 10px;">
-                        <button class="btn btn-sm btn-info" onclick="showProjectModal('${project.id}')">
-                            Quick View
-                        </button>
-                        <a href="/project/${project.id}" class="btn btn-sm btn-outline-info ms-1">
-                            Full Details
-                        </a>
-                    </div>
-                </div>
-            `);
+        const marker = L.marker([project.lat, project.lng], { icon: customIcon }).addTo(homepageMap);
+        
+        // Store the project data on the marker for later reference
+        marker.projectData = project;
+        
+        // Set initial popup content
+        marker.bindPopup(createPopupContent(project, homepageMap.getZoom()));
         
         // Add click event to highlight sidebar item
         marker.on('click', function() {
@@ -145,6 +158,22 @@ function addHomepageMarkers(projects) {
         });
         
         homepageMarkers.push(marker);
+    });
+    
+    // Add zoom event listener to update popup content
+    homepageMap.on('zoomend', function() {
+        const currentZoom = homepageMap.getZoom();
+        homepageMarkers.forEach(marker => {
+            if (marker.isPopupOpen()) {
+                marker.setPopupContent(createPopupContent(marker.projectData, currentZoom));
+            }
+        });
+    });
+    
+    // Also update popup content when it opens
+    homepageMap.on('popupopen', function(e) {
+        const currentZoom = homepageMap.getZoom();
+        e.popup.setContent(createPopupContent(e.popup._source.projectData, currentZoom));
     });
 }
 
