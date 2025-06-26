@@ -4,82 +4,149 @@
 
 {% block head %}
 <!-- No external API keys needed for OpenStreetMap -->
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+    /* Custom styles for better mobile experience */
+    .map-container {
+        height: 100vh;
+        width: 100%;
+    }
+    
+    .sidebar-toggle {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        z-index: 1000;
+        background-color: rgba(13, 110, 253, 0.8);
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    
+    .sidebar-toggle:hover {
+        background-color: #0d6efd;
+    }
+    
+    .offcanvas {
+        width: 300px !important; /* Fixed width for sidebar */
+    }
+    
+    @media (max-width: 576px) {
+        .offcanvas {
+            width: 85% !important; /* Wider sidebar on mobile */
+        }
+        
+        .project-item {
+            padding: 12px !important;
+        }
+        
+        .btn-group {
+            flex-wrap: wrap;
+        }
+        
+        .btn-group .btn {
+            flex: 1 0 45%;
+            margin-bottom: 5px;
+        }
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid px-0">
-    <div class="row g-0">
-        <!-- Sidebar -->
-        <div class="col-lg-4 col-xl-3 bg-dark border-end">
-            <div class="p-4">
-                <h2 class="h4 mb-4">
-                    <i class="fas fa-map-marker-alt me-2 text-info"></i>
-                    Project Locations
-                </h2>
-                
-                <!-- Filter Buttons -->
-                <div class="mb-4">
-                    <div class="btn-group w-100" role="group">
-                        <button type="button" class="btn btn-outline-info active" data-filter="all">
-                            All Projects
-                        </button>
-                        <button type="button" class="btn btn-outline-info" data-filter="Construction">
-                            Construction
-                        </button>
-                        <button type="button" class="btn btn-outline-info" data-filter="Archaeology">
-                            Archaeology
-                        </button>
-                    </div>
+<div class="container-fluid p-0">
+    <!-- Map Container - Full screen -->
+    <div id="map" class="map-container"></div>
+    
+    <!-- Sidebar Toggle Button - Fixed position -->
+    <button class="sidebar-toggle" 
+            type="button" 
+            data-bs-toggle="offcanvas" 
+            data-bs-target="#sidebarOffcanvas"
+            aria-label="Toggle project list">
+        <i class="fas fa-bars text-white fs-5"></i>
+    </button>
+    
+    <!-- Offcanvas Sidebar -->
+    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-map-marker-alt me-2 text-info"></i>
+                Project Portfolio
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body p-3">
+            <!-- Filter Buttons -->
+            <div class="mb-4">
+                <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-outline-info active" data-filter="all">
+                        All
+                    </button>
+                    <button type="button" class="btn btn-outline-info" data-filter="Construction">
+                        Construction
+                    </button>
+                    <button type="button" class="btn btn-outline-info" data-filter="Archaeology">
+                        Archaeology
+                    </button>
                 </div>
-                
-                <!-- Project List -->
-                <div class="project-list">
-                    {% for project in projects %}
-                    <div class="project-item mb-3 p-3 border rounded" 
-                         data-project-id="{{ project.id }}" 
-                         data-type="{{ project.type }}"
-                         data-lat="{{ project.lat }}" 
-                         data-lng="{{ project.lng }}">
-                        <div class="d-flex align-items-start">
-                            <div class="flex-shrink-0 me-3">
-                                {% if project.type == 'Construction' %}
-                                    <i class="fas fa-building text-warning"></i>
-                                {% else %}
-                                    <i class="fas fa-search text-success"></i>
-                                {% endif %}
+            </div>
+            
+            <!-- Search Box -->
+            <div class="mb-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark text-white border-secondary">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control bg-dark text-white border-secondary" 
+                           placeholder="Search projects..." id="projectSearch">
+                </div>
+            </div>
+            
+            <!-- Project List -->
+            <div class="project-list" style="overflow-y: auto; max-height: calc(100vh - 200px);">
+                {% for project in projects %}
+                <div class="project-item mb-3 p-3 border rounded border-secondary" 
+                     data-project-id="{{ project.id }}" 
+                     data-type="{{ project.type }}"
+                     data-lat="{{ project.lat }}" 
+                     data-lng="{{ project.lng }}">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-shrink-0 me-3">
+                            {% if project.type == 'Construction' %}
+                                <i class="fas fa-building text-warning"></i>
+                            {% else %}
+                                <i class="fas fa-search text-success"></i>
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ project.title }}</h6>
+                            <small class="text-muted">
+                                <i class="fas fa-map-pin me-1"></i>
+                                {{ project.location }}
+                            </small>
+                            <div class="mt-2">
+                                <span class="badge bg-{{ 'warning' if project.type == 'Construction' else 'success' }}">
+                                    {{ project.type }}
+                                </span>
+                                <span class="badge bg-{{ 'success' if project.status == 'Completed' else 'info' }} ms-1">
+                                    {{ project.status }}
+                                </span>
                             </div>
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">{{ project.title }}</h6>
-                                <small class="text-muted">
-                                    <i class="fas fa-map-pin me-1"></i>
-                                    {{ project.location }}
-                                </small>
-                                <div class="mt-2">
-                                    <span class="badge bg-{{ 'warning' if project.type == 'Construction' else 'success' }}">
-                                        {{ project.type }}
-                                    </span>
-                                    <span class="badge bg-{{ 'success' if project.status == 'Completed' else 'info' }} ms-1">
-                                        {{ project.status }}
-                                    </span>
-                                </div>
-                                <div class="mt-2">
-                                    <a href="{{ url_for('project_detail', project_id=project.id) }}" 
-                                       class="btn btn-sm btn-outline-info">
-                                        <i class="fas fa-eye me-1"></i>View Details
-                                    </a>
-                                </div>
+                            <div class="mt-2">
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
-        </div>
-        
-        <!-- Map Container -->
-        <div class="col-lg-8 col-xl-9">
-            <div class="map-container">
-                <div id="map" style="height: 100vh; min-height: 600px;"></div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -127,6 +194,25 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeMultiProjectLeafletMap(projects, 'map');
     initializeFilters();
     initializeProjectList();
+    
+    // Add search functionality
+    const searchInput = document.getElementById('projectSearch');
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            const projectItems = document.querySelectorAll('.project-item');
+            
+            projectItems.forEach(item => {
+                const title = item.querySelector('h6').textContent.toLowerCase();
+                const location = item.querySelector('small').textContent.toLowerCase();
+                if (title.includes(searchTerm) || location.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    }
 });
 </script>
 {% endblock %}
