@@ -78,7 +78,11 @@ let homepageMarkers = [];
 
 // Function to create a multi-project Leaflet map
 function initializeMultiProjectLeafletMap(projects, containerId) {
-    homepageMap = L.map(containerId).setView([45.0, 10.0], 3);
+    homepageMap = L.map(containerId, {
+        // Enable better hover interactions
+        tap: false,  // Disable tap delay on mobile
+        closePopupOnClick: false  // Don't close popup on map click
+    }).setView([45.0, 10.0], 3);
     
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -97,8 +101,12 @@ function initializeMultiProjectLeafletMap(projects, containerId) {
     
     return homepageMap;
 }
-
 // Function to add markers to homepage map
+// Update the addHomepageMarkers function to use hover instead of click
+let hoverTimeout;
+let currentHoveredMarker = null;
+
+// Modified addHomepageMarkers function with hover and click interactions
 function addHomepageMarkers(projects) {
     // Clear existing markers
     clearHomepageMarkers();
@@ -144,21 +152,75 @@ function addHomepageMarkers(projects) {
             shadowSize: [41, 41]
         });
         
-        const marker = L.marker([project.lat, project.lng], { icon: customIcon }).addTo(homepageMap);
+        const marker = L.marker([project.lat, project.lng], { 
+            icon: customIcon,
+            riseOnHover: true  // Bring marker to front when hovered
+        }).addTo(homepageMap);
         
         // Store the project data on the marker for later reference
         marker.projectData = project;
         
-        // Set initial popup content
+        // Bind popup with initial content
         marker.bindPopup(createPopupContent(project, homepageMap.getZoom()));
         
-        // Add click event to highlight sidebar item
+        // Hover events for showing popup on hover
+        marker.on('mouseover', function() {
+            currentHoveredMarker = marker;
+            // Delay the popup opening slightly for better UX
+            hoverTimeout = setTimeout(() => {
+                if (currentHoveredMarker === marker) {
+                    marker.openPopup();
+                }
+            }, 300); // 300ms delay before showing popup
+        });
+        
+        marker.on('mouseout', function() {
+            currentHoveredMarker = null;
+            clearTimeout(hoverTimeout);
+            // Don't close immediately - give user time to move to popup
+            setTimeout(() => {
+                if (currentHoveredMarker !== marker && !isCursorOverPopup(marker)) {
+                    marker.closePopup();
+                }
+            }, 200);
+        });
+        
+        // Click event for more permanent interaction
         marker.on('click', function() {
+            // Clear any hover timeouts
+            clearTimeout(hoverTimeout);
+            currentHoveredMarker = null;
+            
+            // Force open the popup (in case it was closed from hover)
+            marker.openPopup();
+            
+            // Highlight in sidebar
             highlightProjectInSidebar(project.id);
+            
+            // Center map on marker with slight zoom
+            homepageMap.setView(marker.getLatLng(), Math.max(homepageMap.getZoom(), 14));
         });
         
         homepageMarkers.push(marker);
     });
+    
+    // Helper function to check if cursor is over a popup
+    function isCursorOverPopup(marker) {
+        const popup = marker.getPopup();
+        if (!popup || !popup.getElement()) return false;
+        
+        const popupElement = popup.getElement();
+        const popupRect = popupElement.getBoundingClientRect();
+        const cursorX = homepageMap._container._leaflet_pos.x + homepageMap._container._leaflet_pos.width / 2;
+        const cursorY = homepageMap._container._leaflet_pos.y + homepageMap._container._leaflet_pos.height / 2;
+        
+        return (
+            cursorX >= popupRect.left &&
+            cursorX <= popupRect.right &&
+            cursorY >= popupRect.top &&
+            cursorY <= popupRect.bottom
+        );
+    }
     
     // Add zoom event listener to update popup content
     homepageMap.on('zoomend', function() {
@@ -170,10 +232,18 @@ function addHomepageMarkers(projects) {
         });
     });
     
-    // Also update popup content when it opens
+    // Update popup content when it opens
     homepageMap.on('popupopen', function(e) {
         const currentZoom = homepageMap.getZoom();
         e.popup.setContent(createPopupContent(e.popup._source.projectData, currentZoom));
+    });
+    
+    // Close hover popups when map is interacted with
+    homepageMap.on('mousedown', function() {
+        if (currentHoveredMarker) {
+            currentHoveredMarker.closePopup();
+            currentHoveredMarker = null;
+        }
     });
 }
 
