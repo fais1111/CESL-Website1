@@ -1,10 +1,13 @@
 import os
 import firebase_admin
-from firebase_admin import credentials
+from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 
-# Load environment variables from .env file (for local development)
+# Load .env file
 load_dotenv()
+
+# Global Firestore client (used in models.py)
+db = None
 
 class Config:
     # Flask configuration
@@ -15,7 +18,7 @@ class Config:
     FIREBASE_PROJECT_ID = os.environ.get('FIREBASE_PROJECT_ID')
     FIREBASE_APP_ID = os.environ.get('FIREBASE_APP_ID')
     
-    # Admin credentials (store securely in production)
+    # Admin credentials
     ADMIN_USERNAME = os.environ.get('ADMIN_USERNAME')
     ADMIN_PASSWORD = os.environ.get('ADMIN_PASSWORD')
     
@@ -27,7 +30,7 @@ class Config:
     # Deployment settings
     PREFERRED_URL_SCHEME = 'https' if os.environ.get('FLASK_ENV') == 'production' else 'http'
     
-    # Firebase service account details loaded from env variables (replace \n in private_key)
+    # Firebase credentials from environment variables
     FIREBASE_CREDENTIALS = {
         "type": os.environ.get("FIREBASE_TYPE"),
         "project_id": os.environ.get("FIREBASE_PROJECT_ID"),
@@ -43,14 +46,14 @@ class Config:
 
     @staticmethod
     def init_firebase():
-        """Initialize Firebase Admin SDK with credentials from env variables."""
+        """Initialize Firebase Admin SDK and set global db"""
+        global db
         if not firebase_admin._apps:
-            # Optional debug prints (remove in production)
-            print("Initializing Firebase with project:", Config.FIREBASE_CREDENTIALS.get('project_id'))
-            # Create credential object from dict
             cred = credentials.Certificate(Config.FIREBASE_CREDENTIALS)
             firebase_admin.initialize_app(cred)
-            print("Firebase initialized successfully")
+            print(f"Firebase initialized with project: {Config.FIREBASE_PROJECT_ID}")
+        db = firestore.client()
+        print("Firestore client initialized successfully")
 
 class DevelopmentConfig(Config):
     DEBUG = True
