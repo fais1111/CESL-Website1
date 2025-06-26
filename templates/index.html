@@ -4,72 +4,45 @@
 
 {% block head %}
 <!-- No external API keys needed for OpenStreetMap -->
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
-    /* Reset body and html for full height */
-    html, body {
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-    }
-    
-    /* Full-screen map container */
+    /* Custom styles for better mobile experience */
     .map-container {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
+        height: 100vh;
         width: 100%;
-        height: 100%;
     }
     
-    /* Toggle button styling */
     .sidebar-toggle {
-        position: fixed;
+        position: absolute;
         top: 15px;
-        left: 15px;
+        right: 15px; /* Changed from left to right */
         z-index: 1000;
-        background-color: rgba(13, 110, 253, 0.9);
+        background-color: rgba(13, 110, 253, 0.8);
         border: none;
         border-radius: 50%;
-        width: 44px;
-        height: 44px;
+        width: 50px;
+        height: 50px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
     }
     
     .sidebar-toggle:hover {
         background-color: #0d6efd;
-        transform: scale(1.05);
     }
     
-    .sidebar-toggle i {
-        color: white;
-        font-size: 1.2rem;
-    }
-    
-    /* Offcanvas sidebar styling */
     .offcanvas {
-        width: 320px !important;
-        background-color: #212529;
+        width: 300px !important; /* Fixed width for sidebar */
     }
     
-    /* Mobile-specific styles */
-    @media (max-width: 768px) {
+    @media (max-width: 576px) {
         .offcanvas {
-            width: 85% !important;
+            width: 85% !important; /* Wider sidebar on mobile */
         }
         
-        .sidebar-toggle {
-            top: 10px;
-            left: 10px;
-            width: 40px;
-            height: 40px;
+        .project-item {
+            padding: 12px !important;
         }
         
         .btn-group {
@@ -77,122 +50,112 @@
         }
         
         .btn-group .btn {
-            padding: 0.25rem 0.5rem;
-            font-size: 0.8rem;
-            margin-bottom: 0.25rem;
+            flex: 1 0 45%;
+            margin-bottom: 5px;
         }
-        
-        .project-item {
-            padding: 0.75rem !important;
-        }
-        
-        .project-item h6 {
-            font-size: 0.9rem;
-        }
-        
-        .offcanvas-body {
-            padding: 1rem !important;
-        }
-    }
-    
-    /* Ensure map is clickable under the toggle button */
-    .leaflet-top.leaflet-left {
-        margin-top: 60px;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="map-container">
-    <!-- Full-screen map -->
-    <div id="map" style="height: 100%; width: 100%;"></div>
+<div class="container-fluid p-0">
+    <!-- Map Container - Full screen -->
+    <div id="map" class="map-container"></div>
     
-    <!-- Sidebar Toggle Button -->
+    <!-- Sidebar Toggle Button - Fixed position (now on right side) -->
     <button class="sidebar-toggle" 
             type="button" 
             data-bs-toggle="offcanvas" 
             data-bs-target="#sidebarOffcanvas"
             aria-label="Toggle project list">
-        <i class="fas fa-bars"></i>
+        <i class="fas fa-bars text-white fs-5"></i>
     </button>
-</div>
-
-<!-- Offcanvas Sidebar -->
-<div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas">
-    <div class="offcanvas-header border-bottom border-secondary">
-        <h5 class="offcanvas-title">
-            <i class="fas fa-map-marker-alt me-2 text-info"></i>
-            Project Portfolio
-        </h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
-    </div>
-    <div class="offcanvas-body p-3">
-        <!-- Filter Buttons -->
-        <div class="mb-3">
-            <div class="btn-group w-100" role="group">
-                <button type="button" class="btn btn-outline-info active" data-filter="all">
-                    All
-                </button>
-                <button type="button" class="btn btn-outline-info" data-filter="Construction">
-                    Construction
-                </button>
-                <button type="button" class="btn btn-outline-info" data-filter="Archaeology">
-                    Archaeology
-                </button>
-            </div>
+    
+    <!-- Offcanvas Sidebar -->
+    <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas">
+        <div class="offcanvas-header border-bottom border-secondary">
+            <h5 class="offcanvas-title">
+                <i class="fas fa-map-marker-alt me-2 text-info"></i>
+                Project Portfolio
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
-        
-        <!-- Search Box -->
-        <div class="mb-3">
-            <div class="input-group">
-                <span class="input-group-text bg-dark text-white border-secondary">
-                    <i class="fas fa-search"></i>
-                </span>
-                <input type="text" class="form-control bg-dark text-white border-secondary" 
-                       placeholder="Search projects..." id="projectSearch">
+        <div class="offcanvas-body p-3">
+            <!-- Contact Information -->
+            <div class="mb-4 p-3 bg-dark border border-secondary rounded">
+                <h6 class="text-info">Geospatial Engineering Unit - CESL</h6>
+                <p class="mb-1 small">No. 11, Jawatta Road, Colombo 05</p>
+                <p class="mb-1 small">(+94)71 6037 803</p>
+                <p class="mb-0 small">pubudumalinda@hotmail.com</p>
             </div>
-        </div>
-        
-        <!-- Project List -->
-        <div class="project-list" style="overflow-y: auto; height: calc(100vh - 180px);">
-            {% for project in projects %}
-            <div class="project-item mb-2 p-2 border rounded border-secondary" 
-                 data-project-id="{{ project.id }}" 
-                 data-type="{{ project.type }}"
-                 data-lat="{{ project.lat }}" 
-                 data-lng="{{ project.lng }}">
-                <div class="d-flex align-items-start">
-                    <div class="flex-shrink-0 me-2">
-                        {% if project.type == 'Construction' %}
-                            <i class="fas fa-building text-warning"></i>
-                        {% else %}
-                            <i class="fas fa-search text-success"></i>
-                        {% endif %}
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-1">{{ project.title }}</h6>
-                        <small class="text-muted">
-                            <i class="fas fa-map-pin me-1"></i>
-                            {{ project.location }}
-                        </small>
-                        <div class="mt-1">
-                            <span class="badge bg-{{ 'warning' if project.type == 'Construction' else 'success' }}">
-                                {{ project.type }}
-                            </span>
-                            <span class="badge bg-{{ 'success' if project.status == 'Completed' else 'info' }} ms-1">
-                                {{ project.status }}
-                            </span>
+            
+            <!-- Filter Buttons -->
+            <div class="mb-4">
+                <div class="btn-group w-100" role="group">
+                    <button type="button" class="btn btn-outline-info active" data-filter="all">
+                        All
+                    </button>
+                    <button type="button" class="btn btn-outline-info" data-filter="Construction">
+                        Construction
+                    </button>
+                    <button type="button" class="btn btn-outline-info" data-filter="Archaeology">
+                        Archaeology
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Search Box -->
+            <div class="mb-4">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark text-white border-secondary">
+                        <i class="fas fa-search"></i>
+                    </span>
+                    <input type="text" class="form-control bg-dark text-white border-secondary" 
+                           placeholder="Search projects..." id="projectSearch">
+                </div>
+            </div>
+            
+            <!-- Project List -->
+            <div class="project-list" style="overflow-y: auto; max-height: calc(100vh - 300px);">
+                {% for project in projects %}
+                <div class="project-item mb-3 p-3 border rounded border-secondary" 
+                     data-project-id="{{ project.id }}" 
+                     data-type="{{ project.type }}"
+                     data-lat="{{ project.lat }}" 
+                     data-lng="{{ project.lng }}">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-shrink-0 me-3">
+                            {% if project.type == 'Construction' %}
+                                <i class="fas fa-building text-warning"></i>
+                            {% else %}
+                                <i class="fas fa-search text-success"></i>
+                            {% endif %}
                         </div>
-                        <div class="mt-1">
-                            <a href="{{ url_for('project_detail', project_id=project.id) }}" 
-                               class="btn btn-sm btn-outline-info">
-                                <i class="fas fa-eye me-1"></i>View
-                            </a>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ project.title }}</h6>
+                            <small class="text-muted">
+                                <i class="fas fa-map-pin me-1"></i>
+                                {{ project.location }}
+                            </small>
+                            <div class="mt-2">
+                                <span class="badge bg-{{ 'warning' if project.type == 'Construction' else 'success' }}">
+                                    {{ project.type }}
+                                </span>
+                                <span class="badge bg-{{ 'success' if project.status == 'Completed' else 'info' }} ms-1">
+                                    {{ project.status }}
+                                </span>
+                            </div>
+                            <div class="mt-2">
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye me-1"></i>View
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
         </div>
     </div>
 </div>
@@ -258,20 +221,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
     }
-    
-    // Handle mobile viewport height
-    function setMapHeight() {
-        const mapContainer = document.getElementById('map');
-        if (mapContainer) {
-            mapContainer.style.height = window.innerHeight + 'px';
-        }
-    }
-    
-    // Set initial height
-    setMapHeight();
-    
-    // Update on resize
-    window.addEventListener('resize', setMapHeight);
 });
 </script>
 {% endblock %}
