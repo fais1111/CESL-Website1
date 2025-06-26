@@ -2,14 +2,17 @@ import os
 from flask import Flask
 from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
-from config import config
+from config import config, Config  # import Config to call init_firebase()
 
 # Create the app with configuration
 app = Flask(__name__)
 
 # Load configuration based on environment
-env = os.environ.get('FLASK_ENV', 'development')
+env = os.environ.get('FLASK_ENV')
 app.config.from_object(config.get(env, config['default']))
+
+# Initialize Firebase Admin SDK from environment variables
+Config.init_firebase()  # <---- Add this here!
 
 # Set secret key
 app.secret_key = app.config['SECRET_KEY']
