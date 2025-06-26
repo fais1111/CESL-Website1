@@ -1,7 +1,7 @@
 import os
 from flask import render_template, jsonify, request, redirect, url_for, flash, session
 from flask_login import login_required, login_user, logout_user, current_user
-from app import app
+from main import app
 from models import Project, Admin
 
 @app.route('/')
