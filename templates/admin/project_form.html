@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'Edit' if project else 'New' }} Project - Admin Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('admin_dashboard') }}">
+                <i class="fas fa-cog me-2"></i>
+                Admin Dashboard
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('admin_dashboard') }}">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+                <a class="nav-link" href="{{ url_for('admin_logout') }}">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Form Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h1 class="display-6">
+                    <i class="fas fa-{{ 'edit' if project else 'plus' }} me-2 text-info"></i>
+                    {{ 'Edit' if project else 'New' }} Project
+                </h1>
+            </div>
+        </div>
+
+        <!-- Project Form -->
+        <form method="POST">
+            <div class="row">
+                <!-- Basic Information -->
+                <div class="col-lg-8">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Basic Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="title" class="form-label">Project Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" 
+                                           value="{{ project.title if project else '' }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="location" class="form-label">Location *</label>
+                                    <input type="text" class="form-control" id="location" name="location" 
+                                           value="{{ project.location if project else '' }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="lat" class="form-label">Latitude *</label>
+                                    <input type="number" step="any" class="form-control" id="lat" name="lat" 
+                                           value="{{ project.lat if project else '' }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lng" class="form-label">Longitude *</label>
+                                    <input type="number" step="any" class="form-control" id="lng" name="lng" 
+                                           value="{{ project.lng if project else '' }}" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description *</label>
+                                <textarea class="form-control" id="description" name="description" rows="4" required>{{ project.description if project else '' }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Project Details -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list-ul me-2"></i>Project Details
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="duration" class="form-label">Duration</label>
+                                    <input type="text" class="form-control" id="duration" name="duration" 
+                                           value="{{ project.details.duration if project and project.details else '' }}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="team_size" class="form-label">Team Size</label>
+                                    <input type="text" class="form-control" id="team_size" name="team_size" 
+                                           value="{{ project.details.team_size if project and project.details else '' }}">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="area" class="form-label">Area</label>
+                                    <input type="text" class="form-control" id="area" name="area" 
+                                           value="{{ project.details.area if project and project.details else '' }}">
+                                </div>
+                            </div>
+                            
+                            <!-- Dynamic Lists -->
+                            <div class="mb-3">
+                                <label class="form-label">Key Findings/Features</label>
+                                <div id="findings-container">
+                                    {% if project and project.details and project.details.findings %}
+                                        {% for finding in project.details.findings %}
+                                            <div class="input-group mb-2">
+                                                <input type="text" class="form-control" name="findings[]" value="{{ finding }}">
+                                                <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                    {% if project and project.details and project.details.features %}
+                                        {% for feature in project.details.features %}
+                                            <div class="input-group mb-2">
+                                                <input type="text" class="form-control" name="features[]" value="{{ feature }}">
+                                                <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="addFinding()">
+                                    <i class="fas fa-plus me-1"></i>Add Finding/Feature
+                                </button>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Techniques Used</label>
+                                <div id="techniques-container">
+                                    {% if project and project.details and project.details.techniques %}
+                                        {% for technique in project.details.techniques %}
+                                            <div class="input-group mb-2">
+                                                <input type="text" class="form-control" name="techniques[]" value="{{ technique }}">
+                                                <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                <button type="button" class="btn btn-outline-info btn-sm" onclick="addTechnique()">
+                                    <i class="fas fa-plus me-1"></i>Add Technique
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Images -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-images me-2"></i>Project Images
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="images-container">
+                                {% if project and project.images %}
+                                    {% for image in project.images %}
+                                        <div class="input-group mb-2">
+                                            <input type="url" class="form-control" name="images[]" value="{{ image }}" placeholder="Image URL">
+                                            <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <button type="button" class="btn btn-outline-info btn-sm" onclick="addImage()">
+                                <i class="fas fa-plus me-1"></i>Add Image URL
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>Project Settings
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="type" class="form-label">Project Type *</label>
+                                <select class="form-select" id="type" name="type" required>
+                                    <option value="">Select Type</option>
+                                    <option value="Construction" {{ 'selected' if project and project.type == 'Construction' else '' }}>
+                                        Construction
+                                    </option>
+                                    <option value="Archaeology" {{ 'selected' if project and project.type == 'Archaeology' else '' }}>
+                                        Archaeology
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="status" class="form-label">Status *</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="">Select Status</option>
+                                    <option value="Completed" {{ 'selected' if project and project.status == 'Completed' else '' }}>
+                                        Completed
+                                    </option>
+                                    <option value="In Progress" {{ 'selected' if project and project.status == 'In Progress' else '' }}>
+                                        In Progress
+                                    </option>
+                                    <option value="Planning" {{ 'selected' if project and project.status == 'Planning' else '' }}>
+                                        Planning
+                                    </option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="year" class="form-label">Year *</label>
+                                <input type="number" class="form-control" id="year" name="year" 
+                                       value="{{ project.year if project else '2024' }}" min="1900" max="2030" required>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>{{ 'Update' if project else 'Create' }} Project
+                                </button>
+                                <a href="{{ url_for('admin_dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        function removeItem(button) {
+            button.parentElement.remove();
+        }
+        
+        function addFinding() {
+            const container = document.getElementById('findings-container');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control" name="findings[]" placeholder="Key finding or feature">
+                <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function addTechnique() {
+            const container = document.getElementById('techniques-container');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="text" class="form-control" name="techniques[]" placeholder="Technique used">
+                <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+        
+        function addImage() {
+            const container = document.getElementById('images-container');
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2';
+            div.innerHTML = `
+                <input type="url" class="form-control" name="images[]" placeholder="Image URL">
+                <button type="button" class="btn btn-outline-danger" onclick="removeItem(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            container.appendChild(div);
+        }
+    </script>
+</body>
+</html>

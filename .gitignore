@@ -1,0 +1,32 @@
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Firebase service account key (DO NOT COMMIT!)
+firebase.json
+
+firebase-key.json
+.env
+
+
+# Flask secret config
+.env
+*.env
+
+# Mac OS / Windows / Linux system files
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Railway build files or persistent volumes (if mounted)
+.mnt/

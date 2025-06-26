@@ -1,0 +1,7 @@
+Flask
+flask-login
+firebase-admin
+python-dotenv
+bcrypt
+gunicorn
+Werkzeug

@@ -1,0 +1,168 @@
+/* Custom styles for the portfolio website */
+
+/* Map container styling */
+.map-container {
+    position: relative;
+}
+
+/* Project list styling */
+.project-item {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: var(--bs-dark);
+    border-color: var(--bs-border-color);
+}
+
+.project-item:hover {
+    background-color: var(--bs-secondary);
+    border-color: var(--bs-info);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.project-item.active {
+    background-color: var(--bs-info);
+    border-color: var(--bs-info);
+    color: var(--bs-dark);
+}
+
+.project-item.active .text-muted {
+    color: var(--bs-dark) !important;
+}
+
+/* Sidebar styling */
+.col-lg-4.bg-dark {
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    overflow-y: auto;
+}
+
+/* Map marker info window styling */
+.map-info-window {
+    max-width: 300px;
+}
+
+.map-info-window img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 0.375rem;
+    margin-bottom: 10px;
+}
+
+/* Button group styling */
+.btn-group .btn {
+    border-radius: 0;
+}
+
+.btn-group .btn:first-child {
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+.btn-group .btn:last-child {
+    border-top-right-radius: 0.375rem;
+    border-bottom-right-radius: 0.375rem;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+/* Image gallery styling */
+.card-img-top {
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.card-img-top:hover {
+    opacity: 0.8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 991.98px) {
+    .col-lg-4.bg-dark {
+        min-height: auto;
+        max-height: 50vh;
+    }
+    
+    #map {
+        height: 50vh !important;
+        min-height: 400px !important;
+    }
+}
+
+/* Modal styling */
+.modal-content {
+    background-color: var(--bs-dark);
+    border-color: var(--bs-border-color);
+}
+
+.modal-header {
+    border-bottom-color: var(--bs-border-color);
+}
+
+.modal-footer {
+    border-top-color: var(--bs-border-color);
+}
+
+/* Badge styling */
+.badge {
+    font-size: 0.8em;
+    padding: 0.35em 0.65em;
+}
+
+/* List group styling */
+.list-group-item {
+    background-color: transparent;
+    border-color: var(--bs-border-color);
+}
+
+/* Breadcrumb styling */
+.breadcrumb {
+    background-color: transparent;
+    padding: 0;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    color: var(--bs-secondary);
+}
+
+/* Footer styling */
+footer {
+    margin-top: auto;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Custom scrollbar for sidebar */
+.col-lg-4.bg-dark::-webkit-scrollbar {
+    width: 6px;
+}
+
+.col-lg-4.bg-dark::-webkit-scrollbar-track {
+    background: var(--bs-dark);
+}
+
+.col-lg-4.bg-dark::-webkit-scrollbar-thumb {
+    background: var(--bs-secondary);
+    border-radius: 3px;
+}
+
+.col-lg-4.bg-dark::-webkit-scrollbar-thumb:hover {
+    background: var(--bs-info);
+}
