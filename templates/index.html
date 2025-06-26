@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Home - Project Portfolio{% endblock %}
+{% block title %}Home - Geospatial Engineering Unit - CESL{% endblock %}
 
 {% block head %}
 <!-- No external API keys needed for OpenStreetMap -->
@@ -15,7 +15,7 @@
     .sidebar-toggle {
         position: absolute;
         top: 15px;
-        right: 15px; /* Changed from left to right */
+        left: 15px;
         z-index: 1000;
         background-color: rgba(13, 110, 253, 0.8);
         border: none;
@@ -36,6 +36,12 @@
         width: 300px !important; /* Fixed width for sidebar */
     }
     
+    /* Move zoom controls to right side */
+    .leaflet-control-zoom {
+        margin-right: 15px !important;
+        margin-top: 80px !important; /* Adjusted to account for moved toggle */
+    }
+    
     @media (max-width: 576px) {
         .offcanvas {
             width: 85% !important; /* Wider sidebar on mobile */
@@ -53,6 +59,12 @@
             flex: 1 0 45%;
             margin-bottom: 5px;
         }
+        
+        /* Adjust zoom controls position on mobile */
+        .leaflet-control-zoom {
+            margin-top: 70px !important;
+            margin-right: 10px !important;
+        }
     }
 </style>
 {% endblock %}
@@ -62,7 +74,7 @@
     <!-- Map Container - Full screen -->
     <div id="map" class="map-container"></div>
     
-    <!-- Sidebar Toggle Button - Fixed position (now on right side) -->
+    <!-- Sidebar Toggle Button - Fixed position -->
     <button class="sidebar-toggle" 
             type="button" 
             data-bs-toggle="offcanvas" 
@@ -76,17 +88,26 @@
         <div class="offcanvas-header border-bottom border-secondary">
             <h5 class="offcanvas-title">
                 <i class="fas fa-map-marker-alt me-2 text-info"></i>
-                Project Portfolio
+                Geospatial Engineering Unit - CESL
             </h5>
             <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-3">
             <!-- Contact Information -->
-            <div class="mb-4 p-3 bg-dark border border-secondary rounded">
-                <h6 class="text-info">Geospatial Engineering Unit - CESL</h6>
-                <p class="mb-1 small">No. 11, Jawatta Road, Colombo 05</p>
-                <p class="mb-1 small">(+94)71 6037 803</p>
-                <p class="mb-0 small">pubudumalinda@hotmail.com</p>
+            <div class="mb-4">
+                <h6 class="text-info">Contact Information:</h6>
+                <p class="small mb-1">
+                    <i class="fas fa-map-marker-alt me-2"></i>
+                    No. 11, Jawatta Road, Colombo 05
+                </p>
+                <p class="small mb-1">
+                    <i class="fas fa-phone me-2"></i>
+                    (+94)71 6037 803
+                </p>
+                <p class="small">
+                    <i class="fas fa-envelope me-2"></i>
+                    pubudumalinda@hotmail.com
+                </p>
             </div>
             
             <!-- Filter Buttons -->
@@ -116,7 +137,7 @@
             </div>
             
             <!-- Project List -->
-            <div class="project-list" style="overflow-y: auto; max-height: calc(100vh - 300px);">
+            <div class="project-list" style="overflow-y: auto; max-height: calc(100vh - 350px);">
                 {% for project in projects %}
                 <div class="project-item mb-3 p-3 border rounded border-secondary" 
                      data-project-id="{{ project.id }}" 
