@@ -4,6 +4,26 @@ from flask_login import LoginManager
 from werkzeug.middleware.proxy_fix import ProxyFix
 from config import config
 
+# --- START: Firebase Admin Initialization ---
+import json
+
+cred_path = '/tmp/firebase-key.json'
+json_str = os.environ.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+
+if json_str:
+    with open(cred_path, 'w') as f:
+        f.write(json_str)
+
+    import firebase_admin
+    from firebase_admin import credentials
+
+    cred = credentials.Certificate(cred_path)
+    firebase_admin.initialize_app(cred)
+    print("Firebase initialized successfully.")
+else:
+    print("FIREBASE_SERVICE_ACCOUNT_JSON environment variable not set.")
+# --- END: Firebase Admin Initialization ---
+
 # Create the app with configuration
 app = Flask(__name__)
 
@@ -43,4 +63,4 @@ def security_headers(response):
 from routes import *
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=app.config['DEBUG'])
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=app.config['DEBUG'])
