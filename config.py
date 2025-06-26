@@ -49,6 +49,7 @@ class Config:
         """Initialize Firebase Admin SDK and set global db"""
         global db
         if not firebase_admin._apps:
+            os.environ['GOOGLE_CLOUD_PROJECT'] = os.environ.get('FIREBASE_PROJECT_ID')
             cred = credentials.Certificate(Config.FIREBASE_CREDENTIALS)
             firebase_admin.initialize_app(cred)
             print(f"Firebase initialized with project: {Config.FIREBASE_PROJECT_ID}")
