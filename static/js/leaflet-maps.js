@@ -129,7 +129,7 @@ function addHomepageMarkers(projects) {
                     <p class="mb-2"><strong>Status:</strong> ${project.status}</p>
                     <p class="mb-2" style="font-size: 0.9em;">${project.description.substring(0, 100)}...</p>
                     <div style="margin-top: 10px;">
-                        <button class="btn btn-sm btn-info" onclick="showProjectModal(${project.id})">
+                        <button class="btn btn-sm btn-info" onclick="showProjectModal('${project.id}')">
                             Quick View
                         </button>
                         <a href="/project/${project.id}" class="btn btn-sm btn-outline-info ms-1">
