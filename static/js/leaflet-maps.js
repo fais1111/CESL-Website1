@@ -280,7 +280,10 @@ function highlightProjectInSidebar(projectId) {
 
 // Function to show project modal
 function showProjectModal(projectId) {
-    fetch(`/api/project/${projectId}`)
+    fetch(`/api/project/${projectId}`).catch(error => {
+    console.error('API fetch error:', error);
+    return { ok: false };
+})
         .then(response => response.json())
         .then(project => {
             // Populate modal with project data
