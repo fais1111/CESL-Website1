@@ -54,6 +54,33 @@
             margin-top: 80px !important;
         }
         
+        /* Fullscreen control positioned below zoom controls */
+        .fullscreen-control {
+            position: absolute;
+            top: 160px;
+            right: 15px;
+            z-index: 1000;
+            background-color: white;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        .fullscreen-control:hover {
+            background-color: #f4f4f4;
+        }
+        
+        .fullscreen-control i {
+            font-size: 14px;
+            color: #333;
+        }
+        
         /* Enhanced navigation */
         .navbar-brand {
             font-weight: 600;
@@ -103,6 +130,11 @@
             .leaflet-control-zoom {
                 margin-top: 70px !important;
                 margin-right: 10px !important;
+            }
+            
+            .fullscreen-control {
+                top: 150px;
+                right: 10px;
             }
             
             .navbar-collapse {
@@ -182,6 +214,11 @@
                     aria-label="Toggle project list">
                 <i class="fas fa-bars text-white fs-5"></i>
             </button>
+            
+            <!-- Fullscreen Control Button -->
+            <div class="fullscreen-control" id="fullscreenBtn" title="Toggle Fullscreen">
+                <i class="fas fa-expand"></i>
+            </div>
             
             <!-- Offcanvas Sidebar -->
             <div class="offcanvas offcanvas-start bg-dark text-white" tabindex="-1" id="sidebarOffcanvas">
@@ -343,6 +380,38 @@
                 });
             });
         }
+        
+        // Fullscreen functionality
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const fullscreenIcon = fullscreenBtn.querySelector('i');
+        
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                // Enter fullscreen
+                document.documentElement.requestFullscreen().then(() => {
+                    fullscreenIcon.className = 'fas fa-compress';
+                    fullscreenBtn.title = 'Exit Fullscreen';
+                }).catch(err => {
+                    console.log('Error attempting to enable fullscreen:', err);
+                });
+            } else {
+                // Exit fullscreen
+                document.exitFullscreen().then(() => {
+                    fullscreenIcon.className = 'fas fa-expand';
+                    fullscreenBtn.title = 'Toggle Fullscreen';
+                }).catch(err => {
+                    console.log('Error attempting to exit fullscreen:', err);
+                });
+            }
+        });
+        
+        // Listen for fullscreen changes (e.g., when user presses ESC)
+        document.addEventListener('fullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                fullscreenIcon.className = 'fas fa-expand';
+                fullscreenBtn.title = 'Toggle Fullscreen';
+            }
+        });
     });
     </script>
     {% endblock %}
