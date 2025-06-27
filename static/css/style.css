@@ -34,7 +34,7 @@
 
 /* Map marker info window styling */
 .map-info-window {
-    max-width: 300px;
+    max-width: 600px;
 }
 
 .map-info-window img {
@@ -87,7 +87,7 @@
     }
     
     #map {
-        height: 50vh !important;
+        height: 100vh !important;
         min-height: 400px !important;
     }
 }
