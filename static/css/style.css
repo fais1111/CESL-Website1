@@ -1,10 +1,5 @@
 /* Custom styles for the portfolio website */
 
-/* Map container styling */
-.map-container {
-    position: relative;
-}
-
 /* Project list styling */
 .project-item {
     cursor: pointer;
