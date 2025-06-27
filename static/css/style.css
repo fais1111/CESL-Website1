@@ -87,7 +87,7 @@
     }
     
     #map {
-        height: auto !important;
+        height: relative !important;
         min-height: 400px !important;
     }
 }
