@@ -87,7 +87,7 @@
     }
     
     #map {
-        height: 100vh !important;
+        height: auto !important;
         min-height: 400px !important;
     }
 }
